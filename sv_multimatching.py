@@ -9,7 +9,7 @@ import pysam
 ##########
 parser = argparse.ArgumentParser(prog="sv_multimatching.py")
 parser.add_argument(
-    "-i", "--input_file", required=True, type=str, help="Path to input file."
+    "-i", "--input_file", required=True, type=str, help="Path to bed variants file."
 )
 parser.add_argument(
     "-r",
