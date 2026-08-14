@@ -44,8 +44,8 @@ args = parser.parse_args()
 #############
 def merge_list_intervals(list_intervals: list((int, int))) -> list:
     """
-    From a list of intervals [(start, end), (start, end)], return a list where overlapping
-    intervals are merged together.
+    From a sorted list of intervals [(start, end), (start, end)], return a list where
+    overlapping intervals are merged together.
     Input: [(int, int)]
     Output: [(int, int)]
     """
