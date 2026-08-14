@@ -99,17 +99,20 @@ def list_of_overlap_sv(
     Return list of interval of the sv with an big enough overlap with the variant at
     chr:start-end.
     """
-    return [
-        (interval.start, interval.end)
-        for interval in bedfile.fetch(reference=chr, start=var_start, end=var_end)
-        if interval.start > var_start - limit
-        and interval.end < var_end + limit
-        and (
-            overlap_size((interval.start, interval.end), (var_start, var_end))
-            / (interval.end - interval.start + 1)
-        )
-        >= overlap
-    ]
+    if chr not in bedfile.contigs:
+        return []
+    else:
+        return [
+            (interval.start, interval.end)
+            for interval in bedfile.fetch(reference=chr, start=var_start, end=var_end)
+            if interval.start > var_start - limit
+            and interval.end < var_end + limit
+            and (
+                overlap_size((interval.start, interval.end), (var_start, var_end))
+                / (interval.end - interval.start + 1)
+            )
+            >= overlap
+        ]
 
 
 def list_of_sv_name(
@@ -141,8 +144,8 @@ def is_list_intervals_in_limits(
     list_intervals: list((int, int)), limit: int, var_start: int, var_end: int
 ) -> bool:
     """
-        Check if there is something in the intervals list, and if the extremities are in
-        the acceptable threshold.
+    Check if there is something in the intervals list, and if the extremities are in
+    the acceptable threshold.
     """
     if list_intervals == []:
         return False
