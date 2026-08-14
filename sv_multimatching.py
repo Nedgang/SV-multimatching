@@ -42,7 +42,7 @@ args = parser.parse_args()
 #############
 # FUNCTIONS #
 #############
-def merge_list_intervals(list_intervals: list((int, int))) -> list:
+def list_merged_intervals(list_intervals: list((int, int))) -> list:
     """
     From a sorted list of intervals [(start, end), (start, end)], return a list where
     overlapping intervals are merged together.
@@ -137,20 +137,20 @@ def list_of_sv_name(
     ]
 
 
-def is_overlap_intervals_in_limits(
-    overlap_intervals: list((int, int)), limit: int, var_start: int, var_end: int
+def is_list_intervals_in_limits(
+    list_intervals: list((int, int)), limit: int, var_start: int, var_end: int
 ) -> bool:
     """
         Check if there is something in the intervals list, and if the extremities are in
         the acceptable threshold.
     """
-    if overlap_intervals == []:
+    if list_intervals == []:
         return False
     elif (
-        overlap_intervals[0][0] > var_start - args.max_distance
-        and overlap_intervals[0][0] < var_start + args.max_distance
-        and overlap_intervals[-1][1] > var_end - args.max_distance
-        and overlap_intervals[-1][1] < var_end + args.max_distance
+        list_intervals[0][0] > var_start - args.max_distance
+        and list_intervals[0][0] < var_start + args.max_distance
+        and list_intervals[-1][1] > var_end - args.max_distance
+        and list_intervals[-1][1] < var_end + args.max_distance
     ):
         return True
     else:
@@ -167,7 +167,7 @@ def main(args: argparse.ArgumentParser) -> None:
     set_chr = set()
     for sv in sv_bed.fetch():
         set_chr.add(sv.contig)
-        overlap_intervals = merge_list_intervals(
+        list_intervals = list_merged_intervals(
             list_of_overlap_sv(
                 bedfile=reference_bed,
                 chr=sv.contig,
@@ -179,8 +179,8 @@ def main(args: argparse.ArgumentParser) -> None:
         )
         # Check if start and end of whole overlap intervals are in the limits
         if (
-            is_overlap_intervals_in_limits(
-                overlap_intervals,
+            is_list_intervals_in_limits(
+                list_intervals,
                 limit=args.max_distance,
                 var_start=sv.start,
                 var_end=sv.end,
@@ -189,7 +189,7 @@ def main(args: argparse.ArgumentParser) -> None:
                 sum(
                     [
                         overlap_size(interval, (sv.start, sv.end))
-                        for interval in overlap_intervals
+                        for interval in list_intervals
                     ]
                 )
                 / (sv.end - sv.start + 1)
@@ -200,7 +200,7 @@ def main(args: argparse.ArgumentParser) -> None:
 
     for chr in set_chr:
         for ref in reference_bed.fetch(reference=chr):
-            overlap_ref_intervals = merge_list_intervals(
+            list_ref_intervals = list_merged_intervals(
                 list_of_overlap_sv(
                     bedfile=sv_bed,
                     chr=chr,
@@ -212,8 +212,8 @@ def main(args: argparse.ArgumentParser) -> None:
             )
             # Check if start and end of whole overlap intervals are in the limits
             if (
-                is_overlap_intervals_in_limits(
-                    overlap_ref_intervals,
+                is_list_intervals_in_limits(
+                    list_ref_intervals,
                     limit=args.max_distance,
                     var_start=ref.start,
                     var_end=ref.end,
@@ -222,7 +222,7 @@ def main(args: argparse.ArgumentParser) -> None:
                     sum(
                         [
                             overlap_size(interval, (ref.start, ref.end))
-                            for interval in overlap_ref_intervals
+                            for interval in list_ref_intervals
                         ]
                     )
                     / (ref.end - ref.start + 1)
