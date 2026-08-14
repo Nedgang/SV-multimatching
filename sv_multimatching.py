@@ -28,6 +28,14 @@ parser.add_argument(
     default=300,
 )
 parser.add_argument(
+    "-n",
+    "--no_limit",
+    required=False,
+    action="store_true",
+    help="""Deactivate maximal distance check between variants start/end, multimatching
+    will only operate based on reciprocal overlap.""",
+)
+parser.add_argument(
     "-o",
     "--overlap",
     required=False,
