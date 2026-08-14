@@ -137,6 +137,26 @@ def list_of_sv_name(
     ]
 
 
+def is_overlap_intervals_in_limits(
+    overlap_intervals: list((int, int)), limit: int, var_start: int, var_end: int
+) -> bool:
+    """
+        Check if there is something in the intervals list, and if the extremities are in
+        the acceptable threshold.
+    """
+    if overlap_intervals == []:
+        return False
+    elif (
+        overlap_intervals[0][0] > var_start - args.max_distance
+        and overlap_intervals[0][0] < var_start + args.max_distance
+        and overlap_intervals[-1][1] > var_end - args.max_distance
+        and overlap_intervals[-1][1] < var_end + args.max_distance
+    ):
+        return True
+    else:
+        return False
+
+
 ########
 # MAIN #
 ########
@@ -147,45 +167,66 @@ def main(args: argparse.ArgumentParser) -> None:
     set_chr = set()
     for sv in sv_bed.fetch():
         set_chr.add(sv.contig)
-        if (
-            sum(
-                [
-                    overlap_size(interval, (sv.start, sv.end))
-                    for interval in merge_list_intervals(
-                        list_of_overlap_sv(
-                            bedfile=reference_bed,
-                            chr=sv.contig,
-                            var_start=sv.start,
-                            var_end=sv.end,
-                            limit=args.max_distance,
-                            overlap=args.overlap,
-                        )
-                    )
-                ]
+        overlap_intervals = merge_list_intervals(
+            list_of_overlap_sv(
+                bedfile=reference_bed,
+                chr=sv.contig,
+                var_start=sv.start,
+                var_end=sv.end,
+                limit=args.max_distance,
+                overlap=args.overlap,
             )
-            / (sv.end - sv.start + 1)
-        ) >= args.overlap:
+        )
+        # Check if start and end of whole overlap intervals are in the limits
+        if (
+            is_overlap_intervals_in_limits(
+                overlap_intervals,
+                limit=args.max_distance,
+                var_start=sv.start,
+                var_end=sv.end,
+            )
+            and (
+                sum(
+                    [
+                        overlap_size(interval, (sv.start, sv.end))
+                        for interval in overlap_intervals
+                    ]
+                )
+                / (sv.end - sv.start + 1)
+            )
+            >= args.overlap
+        ):
             print(sv.name)
 
     for chr in set_chr:
         for ref in reference_bed.fetch(reference=chr):
-            if (
-                sum(
-                    [
-                        overlap_size(interval, (ref.start, ref.end))
-                        for interval in merge_list_intervals(
-                            list_of_overlap_sv(
-                                bedfile=sv_bed,
-                                chr=chr,
-                                var_start=ref.start,
-                                var_end=ref.end,
-                                limit=args.max_distance,
-                                overlap=args.overlap,
-                            )
-                        )
-                    ]
+            overlap_ref_intervals = merge_list_intervals(
+                list_of_overlap_sv(
+                    bedfile=sv_bed,
+                    chr=chr,
+                    var_start=ref.start,
+                    var_end=ref.end,
+                    limit=args.max_distance,
+                    overlap=args.overlap,
                 )
-                / (ref.end - ref.start + 1)
+            )
+            # Check if start and end of whole overlap intervals are in the limits
+            if (
+                is_overlap_intervals_in_limits(
+                    overlap_ref_intervals,
+                    limit=args.max_distance,
+                    var_start=ref.start,
+                    var_end=ref.end,
+                )
+                and (
+                    sum(
+                        [
+                            overlap_size(interval, (ref.start, ref.end))
+                            for interval in overlap_ref_intervals
+                        ]
+                    )
+                    / (ref.end - ref.start + 1)
+                )
                 >= args.overlap
             ):
                 print(
