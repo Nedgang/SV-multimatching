@@ -28,6 +28,14 @@ parser.add_argument(
     "-i", "--input_file", required=True, type=str, help="Path to bed variants file."
 )
 parser.add_argument(
+    "-l",
+    "--list_variant_id",
+    required=False,
+    type=str,
+    help="""Path to a txt file (no header) for a listing of variants ID found in the
+    reference file""",
+)
+parser.add_argument(
     "-o",
     "--overlap",
     required=False,
@@ -198,12 +206,22 @@ def main(args: argparse.ArgumentParser) -> None:
                 )
 
     if args.tsv_path is None:
-        output_dataframe = set(
-            ",".join(output_dataframe["#Variant"].unique().to_list()).split(",")
-        )
-        print("\n".join(output_dataframe))
+        print(output_dataframe.unique())
     else:
         output_dataframe.unique().write_csv(args.tsv_path, separator="\t")
+
+    if args.list_variant_id is not None:
+        with open(args.list_variant_id) as file:
+            file.write(
+                "\n".join(
+                    set(
+                        ",".join(output_dataframe["#Variant"].unique().to_list()).split(
+                            ","
+                        )
+                    )
+                )
+            )
+        file.close()
 
 
 if __name__ == "__main__":
