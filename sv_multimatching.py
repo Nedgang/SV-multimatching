@@ -72,7 +72,7 @@ def list_of_overlap_sv(
         return []
     else:
         return [
-            (interval.start, interval.end)
+            interval
             for interval in bedfile.fetch(reference=chr, start=var_start, end=var_end)
             if interval.start > var_start - limit
             and interval.end < var_end + limit
@@ -84,31 +84,6 @@ def list_of_overlap_sv(
         ]
 
 
-def list_of_sv_name(
-    bedfile: pysam.TabixFile,
-    chr: str,
-    var_start: int,
-    var_end: int,
-    limit: int,
-    overlap: float,
-) -> list:
-    """
-    Return list of name of the sv with an big enough overlap with the variant at
-    chr:start-end.
-    """
-    return [
-        interval.name
-        for interval in bedfile.fetch(reference=chr, start=var_start, end=var_end)
-        if interval.start > var_start - limit
-        and interval.end < var_end + limit
-        and (
-            overlap_size((interval.start, interval.end), (var_start, var_end))
-            / (interval.end - interval.start + 1)
-        )
-        >= overlap
-    ]
-
-
 ########
 # MAIN #
 ########
@@ -118,17 +93,21 @@ def main(args: argparse.ArgumentParser) -> None:
     reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
     set_chr = set()
     # First from one variant at a time, search for all overlapping reference
+    print("From variant:")
     for sv in sv_bed.fetch():
         set_chr.add(sv.contig)
         list_intervals = list_merged_intervals(
-            list_of_overlap_sv(
-                bedfile=reference_bed,
-                chr=sv.contig,
-                var_start=sv.start,
-                var_end=sv.end,
-                limit=args.max_distance,
-                overlap=args.overlap,
-            )
+            [
+                (interval.start, interval.end)
+                for interval in list_of_overlap_sv(
+                    bedfile=reference_bed,
+                    chr=sv.contig,
+                    var_start=sv.start,
+                    var_end=sv.end,
+                    limit=args.max_distance,
+                    overlap=args.overlap,
+                )
+            ]
         )
         # Check if start and end of whole overlap intervals are in the limits
         if (
@@ -152,17 +131,19 @@ def main(args: argparse.ArgumentParser) -> None:
             print(sv.name)
 
     # Then, from one reference at a time, search for all overlapping variants
+    print("From ref")
     for chr in set_chr:
         for ref in reference_bed.fetch(reference=chr):
+            list_variants_intervals = list_of_overlap_sv(
+                bedfile=sv_bed,
+                chr=chr,
+                var_start=ref.start,
+                var_end=ref.end,
+                limit=args.max_distance,
+                overlap=args.overlap,
+            )
             list_ref_intervals = list_merged_intervals(
-                list_of_overlap_sv(
-                    bedfile=sv_bed,
-                    chr=chr,
-                    var_start=ref.start,
-                    var_end=ref.end,
-                    limit=args.max_distance,
-                    overlap=args.overlap,
-                )
+                [(interval.start, interval.end) for interval in list_variants_intervals]
             )
             # Check if start and end of whole overlap intervals are in the limits
             if (
@@ -183,18 +164,7 @@ def main(args: argparse.ArgumentParser) -> None:
                 )
                 >= args.overlap
             ):
-                print(
-                    "\n".join(
-                        list_of_sv_name(
-                            bedfile=sv_bed,
-                            chr=chr,
-                            var_start=ref.start,
-                            var_end=ref.end,
-                            limit=args.max_distance,
-                            overlap=args.overlap,
-                        )
-                    )
-                )
+                print("\n".join(interval.name for interval in list_variants_intervals))
 
 
 if __name__ == "__main__":
