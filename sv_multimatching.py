@@ -247,11 +247,11 @@ def main(args: argparse.ArgumentParser) -> None:
     if args.list_variant_id is not None:
         with open(args.list_variant_id, "w") as file:
             file.write(
-                "\n".join(
+                "\n".join(sorted(
                     set(
                         ",".join(output_dataframe["#Variant"].unique().to_list()).split(
                             ","
-                        )
+                        ))
                     )
                 )
             )
