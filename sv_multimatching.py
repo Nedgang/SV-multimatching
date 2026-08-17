@@ -61,7 +61,7 @@ def list_of_overlap_sv(
     var_start: int,
     var_end: int,
     limit: int,
-    overlap: float,
+    min_overlap: float,
 ) -> list:
     """
     Return list of interval of the sv with an big enough overlap with the variant at
@@ -77,7 +77,7 @@ def list_of_overlap_sv(
                 overlap_size((interval.start, interval.end), (var_start, var_end))
                 / (interval.end - interval.start + 1)
             )
-            >= overlap
+            >= min_overlap
         ]
     else:
         return [
@@ -89,7 +89,7 @@ def list_of_overlap_sv(
                 overlap_size((interval.start, interval.end), (var_start, var_end))
                 / (interval.end - interval.start + 1)
             )
-            >= overlap
+            >= min_overlap
         ]
 
 
