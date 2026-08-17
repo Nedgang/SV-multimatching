@@ -29,17 +29,9 @@ parser.add_argument(
     "--max_distance",
     required=False,
     type=int,
-    help="""Maximal distance between variants start/end to check if there is a match.
-    (default=300)""",
+    help="""Maximal distance between variants start/end to check if there is a match
+    (default=300). Can be deactivated by setting it to -1.""",
     default=300,
-)
-parser.add_argument(
-    "-n",
-    "--no_limit",
-    required=False,
-    action="store_true",
-    help="""Deactivate maximal distance check between variants start/end, multimatching
-    will only operate based on reciprocal overlap.""",
 )
 parser.add_argument(
     "-o",
@@ -51,8 +43,6 @@ parser.add_argument(
 )
 # Parser instantation
 args = parser.parse_args()
-if args.no_limit:
-    args.max_distance = -1
 
 
 #############
