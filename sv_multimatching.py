@@ -51,6 +51,8 @@ parser.add_argument(
 )
 # Parser instantation
 args = parser.parse_args()
+if args.no_limit:
+    args.limit = -1
 
 
 #############
@@ -70,6 +72,16 @@ def list_of_overlap_sv(
     """
     if chr not in bedfile.contigs:
         return []
+    if limit < 0:
+        return [
+            interval
+            for interval in bedfile.fetch(reference=chr, start=var_start, end=var_end)
+            if (
+                overlap_size((interval.start, interval.end), (var_start, var_end))
+                / (interval.end - interval.start + 1)
+            )
+            >= overlap
+        ]
     else:
         return [
             interval
