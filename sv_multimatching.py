@@ -4,6 +4,7 @@
 import argparse
 import polars as pl
 import pysam
+import pysam.bcftools
 
 from utils.intervals_utils import (
     merged_intervals,
@@ -102,13 +103,35 @@ def list_of_overlap_sv(
         ]
 
 
+def vcf_to_bedfile(vcf_path: str, bed_gz_path: str) -> None:
+    """ """
+    if bed_gz_path.split(".")[-1] != "gz" or bed_gz_path.split(".")[-2] != "bed":
+        raise ValueError(f"bed_gz_path: {bed_gz_path}. Wrong type, not a bed.gz!")
+    bed_path = ".".join(bed_gz_path.split(".")[:-1])
+    pysam.bcftools.query(
+        "-f", "%CHROM\t%POS\t%END\t%ID", "-o", bed_path, vcf_path, catch_stdout=False
+    )
+    pysam.tabix_compress(filename_in=bed_path, filename_out=bed_gz_path, force=True)
+    pysam.tabix_index(bed_gz_path, seq_col=0, start_col=1, end_col=2, force=True)
+
+
 ########
 # MAIN #
 ########
 def main(args: argparse.ArgumentParser) -> None:
     """ """
-    sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
-    reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
+    if args.input_file.split(".")[-2:] != ["bed", "gz"]:
+        bedfile = args.input_file.split(".")[0]+".bed.gz"
+        vcf_to_bedfile(args.input_file, bedfile)
+        sv_bed = pysam.TabixFile(bedfile, parser=pysam.asBed())
+    else:
+        sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
+    if args.reference.split(".")[-2:] != ["bed", "gz"]:
+        bedfile = args.reference.split(".")[0]+".bed.gz"
+        vcf_to_bedfile(args.input_file, bedfile)
+        reference_bed = pysam.TabixFile(bedfile, parser=pysam.asBed())
+    else:
+        reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
     output_dataframe = pl.DataFrame(
         [
             pl.Series("#Variant", [], dtype=pl.String),
