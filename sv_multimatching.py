@@ -102,15 +102,6 @@ def list_of_overlap_sv(
         ]
 
 
-def increment_output_dataframe(
-    variant: str, ref: str, output_dataframe: pl.DataFrame
-) -> pl.DataFrame:
-    """ """
-    return pl.concat(
-        [output_dataframe, pl.DataFrame({"#Variant": variant, "Reference": ref})]
-    )
-
-
 ########
 # MAIN #
 ########
@@ -158,10 +149,18 @@ def main(args: argparse.ArgumentParser) -> None:
             )
             >= args.overlap
         ):
-            output_dataframe = increment_output_dataframe(
-                variant=sv.name,
-                ref=",".join([interval.name for interval in list_ref_intervals]),
-                output_dataframe=output_dataframe,
+            output_dataframe = pl.concat(
+                (
+                    output_dataframe,
+                    pl.DataFrame(
+                        {
+                            "#Variant": sv.name,
+                            "Reference": ",".join(
+                                [interval.name for interval in list_ref_intervals]
+                            ),
+                        }
+                    ),
+                )
             )
 
     # Then, from one reference at a time, search for all overlapping variants
@@ -197,12 +196,19 @@ def main(args: argparse.ArgumentParser) -> None:
                 )
                 >= args.overlap
             ):
-                output_dataframe = increment_output_dataframe(
-                    variant=",".join(
-                        interval.name for interval in list_variants_intervals
-                    ),
-                    ref=ref.name,
-                    output_dataframe=output_dataframe,
+                output_dataframe = pl.concat(
+                    (
+                        output_dataframe,
+                        pl.DataFrame(
+                            {
+                                "#Variant": ",".join(
+                                    interval.name
+                                    for interval in list_variants_intervals
+                                ),
+                                "Reference": ref.name,
+                            }
+                        ),
+                    )
                 )
 
     if args.tsv_path is None:
