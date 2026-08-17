@@ -5,7 +5,7 @@ import argparse
 import pysam
 
 from utils.intervals_utils import (
-    list_merged_intervals,
+    merged_intervals,
     overlap_size,
     is_list_intervals_in_limits,
 )
@@ -96,7 +96,7 @@ def main(args: argparse.ArgumentParser) -> None:
     print("From variant:")
     for sv in sv_bed.fetch():
         set_chr.add(sv.contig)
-        list_intervals = list_merged_intervals(
+        list_intervals = merged_intervals(
             [
                 (interval.start, interval.end)
                 for interval in list_of_overlap_sv(
@@ -142,7 +142,7 @@ def main(args: argparse.ArgumentParser) -> None:
                 limit=args.max_distance,
                 overlap=args.overlap,
             )
-            list_ref_intervals = list_merged_intervals(
+            list_ref_intervals = merged_intervals(
                 [(interval.start, interval.end) for interval in list_variants_intervals]
             )
             # Check if start and end of whole overlap intervals are in the limits

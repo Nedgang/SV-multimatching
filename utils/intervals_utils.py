@@ -1,7 +1,7 @@
 #############
 # FUNCTIONS #
 #############
-def list_merged_intervals(list_intervals: list((int, int))) -> list:
+def merged_intervals(list_intervals: list((int, int))) -> list:
     """
     From a sorted list of intervals [(start, end), (start, end)], return a list where
     overlapping intervals are merged together.
