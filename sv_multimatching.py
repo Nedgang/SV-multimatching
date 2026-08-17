@@ -15,16 +15,6 @@ from utils.intervals_utils import (
 ##########
 parser = argparse.ArgumentParser(prog="sv_multimatching.py")
 parser.add_argument(
-    "-i", "--input_file", required=True, type=str, help="Path to bed variants file."
-)
-parser.add_argument(
-    "-r",
-    "--reference",
-    required=True,
-    type=str,
-    help="Path to reference bed file to compare variants to.",
-)
-parser.add_argument(
     "-d",
     "--max_distance",
     required=False,
@@ -34,12 +24,29 @@ parser.add_argument(
     default=300,
 )
 parser.add_argument(
+    "-i", "--input_file", required=True, type=str, help="Path to bed variants file."
+)
+parser.add_argument(
     "-o",
     "--overlap",
     required=False,
     type=float,
     help="Reciprocal overlap needed to validate the match. (default=0.8)",
     default=0.8,
+)
+parser.add_argument(
+    "-r",
+    "--reference",
+    required=True,
+    type=str,
+    help="Path to reference bed file to compare variants to.",
+)
+parser.add_argument(
+    "-t",
+    "--tsv_path",
+    required=False,
+    type=str,
+    help="Path to tsv file for storing results.",
 )
 # Parser instantation
 args = parser.parse_args()
@@ -95,21 +102,18 @@ def main(args: argparse.ArgumentParser) -> None:
     reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
     set_chr = set()
     # First from one variant at a time, search for all overlapping reference
-    print("From variant:")
     for sv in sv_bed.fetch():
         set_chr.add(sv.contig)
+        list_ref_intervals = list_of_overlap_sv(
+            bedfile=reference_bed,
+            chr=sv.contig,
+            var_start=sv.start,
+            var_end=sv.end,
+            limit=args.max_distance,
+            overlap=args.overlap,
+        )
         list_intervals = merged_intervals(
-            [
-                (interval.start, interval.end)
-                for interval in list_of_overlap_sv(
-                    bedfile=reference_bed,
-                    chr=sv.contig,
-                    var_start=sv.start,
-                    var_end=sv.end,
-                    limit=args.max_distance,
-                    overlap=args.overlap,
-                )
-            ]
+            [(interval.start, interval.end) for interval in list_ref_intervals]
         )
         # Check if start and end of whole overlap intervals are in the limits
         if (
@@ -130,10 +134,13 @@ def main(args: argparse.ArgumentParser) -> None:
             )
             >= args.overlap
         ):
-            print(sv.name)
+            print(
+                sv.name
+                + "\t"
+                + ",".join([interval.name for interval in list_ref_intervals])
+            )
 
     # Then, from one reference at a time, search for all overlapping variants
-    print("From ref")
     for chr in set_chr:
         for ref in reference_bed.fetch(reference=chr):
             list_variants_intervals = list_of_overlap_sv(
@@ -166,7 +173,11 @@ def main(args: argparse.ArgumentParser) -> None:
                 )
                 >= args.overlap
             ):
-                print("\n".join(interval.name for interval in list_variants_intervals))
+                print(
+                    ",".join(interval.name for interval in list_variants_intervals)
+                    + "\t"
+                    + ref.name
+                )
 
 
 if __name__ == "__main__":
