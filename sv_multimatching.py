@@ -210,9 +210,14 @@ def main(args: argparse.ArgumentParser) -> None:
                         ),
                     )
                 )
-
+    # Everything is done, now it's just display time.
     if args.tsv_path is None:
-        print(output_dataframe.unique())
+        print("#Variant\tReference")
+        for i in [
+            "\t".join((line["#Variant"], line["Reference"]))
+            for line in output_dataframe.unique().to_dicts()
+        ]:
+            print(i)
     else:
         output_dataframe.unique().write_csv(args.tsv_path, separator="\t")
 
