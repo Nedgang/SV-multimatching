@@ -2,6 +2,7 @@
 # IMPORT #
 ##########
 import argparse
+import polars as pl
 import pysam
 
 from utils.intervals_utils import (
@@ -93,13 +94,28 @@ def list_of_overlap_sv(
         ]
 
 
+def increment_output_dataframe(
+    variant: str, ref: str, output_dataframe: pl.DataFrame
+) -> pl.DataFrame:
+    """ """
+    return pl.concat(
+        [output_dataframe, pl.DataFrame({"#Variant": variant, "Reference": ref})]
+    )
+
+
 ########
 # MAIN #
 ########
 def main(args: argparse.ArgumentParser) -> None:
-    """"""
+    """ """
     sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
     reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
+    output_dataframe = pl.DataFrame(
+        [
+            pl.Series("#Variant", [], dtype=pl.String),
+            pl.Series("Reference", [], dtype=pl.String),
+        ]
+    )
     set_chr = set()
     # First from one variant at a time, search for all overlapping reference
     for sv in sv_bed.fetch():
@@ -134,10 +150,10 @@ def main(args: argparse.ArgumentParser) -> None:
             )
             >= args.overlap
         ):
-            print(
-                sv.name
-                + "\t"
-                + ",".join([interval.name for interval in list_ref_intervals])
+            output_dataframe = increment_output_dataframe(
+                variant=sv.name,
+                ref=",".join([interval.name for interval in list_ref_intervals]),
+                output_dataframe=output_dataframe,
             )
 
     # Then, from one reference at a time, search for all overlapping variants
@@ -173,11 +189,21 @@ def main(args: argparse.ArgumentParser) -> None:
                 )
                 >= args.overlap
             ):
-                print(
-                    ",".join(interval.name for interval in list_variants_intervals)
-                    + "\t"
-                    + ref.name
+                output_dataframe = increment_output_dataframe(
+                    variant=",".join(
+                        interval.name for interval in list_variants_intervals
+                    ),
+                    ref=ref.name,
+                    output_dataframe=output_dataframe,
                 )
+
+    if args.tsv_path is None:
+        output_dataframe = set(
+            ",".join(output_dataframe["#Variant"].unique().to_list()).split(",")
+        )
+        print("\n".join(output_dataframe))
+    else:
+        output_dataframe.unique().write_csv(args.tsv_path, separator="\t")
 
 
 if __name__ == "__main__":
