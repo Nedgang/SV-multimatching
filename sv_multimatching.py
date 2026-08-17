@@ -121,13 +121,13 @@ def vcf_to_bedfile(vcf_path: str, bed_gz_path: str) -> None:
 def main(args: argparse.ArgumentParser) -> None:
     """ """
     if args.input_file.split(".")[-2:] != ["bed", "gz"]:
-        bedfile = args.input_file.split(".")[0]+".bed.gz"
+        bedfile = args.input_file.split(".")[0] + ".bed.gz"
         vcf_to_bedfile(args.input_file, bedfile)
         sv_bed = pysam.TabixFile(bedfile, parser=pysam.asBed())
     else:
         sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
     if args.reference.split(".")[-2:] != ["bed", "gz"]:
-        bedfile = args.reference.split(".")[0]+".bed.gz"
+        bedfile = args.reference.split(".")[0] + ".bed.gz"
         vcf_to_bedfile(args.input_file, bedfile)
         reference_bed = pysam.TabixFile(bedfile, parser=pysam.asBed())
     else:
@@ -247,11 +247,13 @@ def main(args: argparse.ArgumentParser) -> None:
     if args.list_variant_id is not None:
         with open(args.list_variant_id, "w") as file:
             file.write(
-                "\n".join(sorted(
-                    set(
-                        ",".join(output_dataframe["#Variant"].unique().to_list()).split(
-                            ","
-                        ))
+                "\n".join(
+                    sorted(
+                        set(
+                            ",".join(
+                                output_dataframe["#Variant"].unique().to_list()
+                            ).split(",")
+                        )
                     )
                 )
             )
