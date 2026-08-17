@@ -120,18 +120,26 @@ def vcf_to_bedfile(vcf_path: str, bed_gz_path: str) -> None:
 ########
 def main(args: argparse.ArgumentParser) -> None:
     """ """
-    if args.input_file.split(".")[-2:] != ["bed", "gz"]:
+    end_input = args.input_file.split(".")[-2:]
+    if end_input == ["bed", "gz"]:
+        sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
+    elif end_input == ["vcf", "gz"] or end_input[1] == "bcf" or end_input[1] == "vcf":
         bedfile = args.input_file.split(".")[0] + ".bed.gz"
         vcf_to_bedfile(args.input_file, bedfile)
         sv_bed = pysam.TabixFile(bedfile, parser=pysam.asBed())
     else:
-        sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
-    if args.reference.split(".")[-2:] != ["bed", "gz"]:
+        raise ValueError(f"Input file: {args.input_file} not a bed.gz or VCF/BCF file!")
+    end_ref = args.reference.split(".")[-2:]
+    if end_ref == ["bed", "gz"]:
+        reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
+    elif end_ref == ["vcf", "gz"] or end_ref[1] == "bcf" or end_ref[1] == "vcf":
         bedfile = args.reference.split(".")[0] + ".bed.gz"
         vcf_to_bedfile(args.input_file, bedfile)
         reference_bed = pysam.TabixFile(bedfile, parser=pysam.asBed())
     else:
-        reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
+        raise ValueError(
+            f"Reference file: {args.input_file} not a bed.gz or VCF/BCF file!"
+        )
     output_dataframe = pl.DataFrame(
         [
             pl.Series("#Variant", [], dtype=pl.String),
