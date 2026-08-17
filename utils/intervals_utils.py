@@ -55,7 +55,7 @@ def is_list_intervals_in_limits(
     """
     if list_intervals == []:
         return False
-    if limit < 0:
+    elif limit < 0:
         return True
     elif (
         list_intervals[0][0] > var_start - limit
