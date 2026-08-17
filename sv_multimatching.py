@@ -52,7 +52,7 @@ parser.add_argument(
 # Parser instantation
 args = parser.parse_args()
 if args.no_limit:
-    args.limit = -1
+    args.max_distance = -1
 
 
 #############
