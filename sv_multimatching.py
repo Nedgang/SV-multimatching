@@ -120,6 +120,7 @@ def vcf_to_bedfile(vcf_path: str, bed_gz_path: str) -> None:
 ########
 def main(args: argparse.ArgumentParser) -> None:
     """ """
+    # Check if input files are in the correct format:
     end_input = args.input_file.split(".")[-2:]
     if end_input == ["bed", "gz"]:
         sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
@@ -140,12 +141,14 @@ def main(args: argparse.ArgumentParser) -> None:
         raise ValueError(
             f"Reference file: {args.input_file} not a bed.gz or VCF/BCF file!"
         )
+    # Initialisation of the return dataframe:
     output_dataframe = pl.DataFrame(
         [
             pl.Series("#Variant", [], dtype=pl.String),
             pl.Series("Reference", [], dtype=pl.String),
         ]
     )
+    # We need to keep trace of the chromosomes we work on.
     set_chr = set()
     # First from one variant at a time, search for all overlapping reference
     for sv in sv_bed.fetch():
