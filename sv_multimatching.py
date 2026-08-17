@@ -117,6 +117,7 @@ def main(args: argparse.ArgumentParser) -> None:
     sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
     reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
     set_chr = set()
+    # First from one variant at a time, search for all overlapping reference
     for sv in sv_bed.fetch():
         set_chr.add(sv.contig)
         list_intervals = list_merged_intervals(
@@ -150,6 +151,7 @@ def main(args: argparse.ArgumentParser) -> None:
         ):
             print(sv.name)
 
+    # Then, from one reference at a time, search for all overlapping variants
     for chr in set_chr:
         for ref in reference_bed.fetch(reference=chr):
             list_ref_intervals = list_merged_intervals(
