@@ -121,19 +121,26 @@ def vcf_to_bedfile(vcf_path: str, bed_gz_path: str) -> None:
 def main(args: argparse.ArgumentParser) -> None:
     """ """
     # Check if input files are in the correct format:
-    end_input = args.input_file.split(".")[-2:]
-    if end_input == ["bed", "gz"]:
+    if args.input_file.endswith(".bed.gz"):
         sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
-    elif end_input == ["vcf", "gz"] or end_input[1] == "bcf" or end_input[1] == "vcf":
+    elif (
+        args.input_file.endswith(".vcf.gz")
+        or args.input_file.endswith(".vcf")
+        or args.input_file.endswith(".bcf")
+    ):
         bedfile = args.input_file.split(".")[0] + ".bed.gz"
         vcf_to_bedfile(args.input_file, bedfile)
         sv_bed = pysam.TabixFile(bedfile, parser=pysam.asBed())
     else:
         raise ValueError(f"Input file: {args.input_file} not a bed.gz or VCF/BCF file!")
-    end_ref = args.reference.split(".")[-2:]
-    if end_ref == ["bed", "gz"]:
+    # Ref
+    if args.reference.endswith(".bed.gz"):
         reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
-    elif end_ref == ["vcf", "gz"] or end_ref[1] == "bcf" or end_ref[1] == "vcf":
+    elif (
+        args.reference.endswith(".vcf.gz")
+        or args.reference.endswith(".vcf")
+        or args.reference.endswith(".bcf")
+    ):
         bedfile = args.reference.split(".")[0] + ".bed.gz"
         vcf_to_bedfile(args.input_file, bedfile)
         reference_bed = pysam.TabixFile(bedfile, parser=pysam.asBed())
