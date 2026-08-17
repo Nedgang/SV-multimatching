@@ -222,7 +222,7 @@ def main(args: argparse.ArgumentParser) -> None:
         output_dataframe.unique().write_csv(args.tsv_path, separator="\t")
 
     if args.list_variant_id is not None:
-        with open(args.list_variant_id) as file:
+        with open(args.list_variant_id, "w") as file:
             file.write(
                 "\n".join(
                     set(
