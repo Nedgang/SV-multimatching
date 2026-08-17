@@ -142,13 +142,13 @@ def main(args: argparse.ArgumentParser) -> None:
                 limit=args.max_distance,
                 overlap=args.overlap,
             )
-            list_ref_intervals = merged_intervals(
+            list_intervals = merged_intervals(
                 [(interval.start, interval.end) for interval in list_variants_intervals]
             )
             # Check if start and end of whole overlap intervals are in the limits
             if (
                 is_list_intervals_in_limits(
-                    list_ref_intervals,
+                    list_intervals,
                     limit=args.max_distance,
                     var_start=ref.start,
                     var_end=ref.end,
@@ -157,7 +157,7 @@ def main(args: argparse.ArgumentParser) -> None:
                     sum(
                         [
                             overlap_size(interval, (ref.start, ref.end))
-                            for interval in list_ref_intervals
+                            for interval in list_intervals
                         ]
                     )
                     / (ref.end - ref.start + 1)
