@@ -110,7 +110,7 @@ def main(args: argparse.ArgumentParser) -> None:
             var_start=sv.start,
             var_end=sv.end,
             limit=args.max_distance,
-            overlap=args.overlap,
+            min_overlap=args.overlap,
         )
         list_intervals = merged_intervals(
             [(interval.start, interval.end) for interval in list_ref_intervals]
@@ -149,7 +149,7 @@ def main(args: argparse.ArgumentParser) -> None:
                 var_start=ref.start,
                 var_end=ref.end,
                 limit=args.max_distance,
-                overlap=args.overlap,
+                min_overlap=args.overlap,
             )
             list_intervals = merged_intervals(
                 [(interval.start, interval.end) for interval in list_variants_intervals]
