@@ -234,11 +234,13 @@ def main(args: argparse.ArgumentParser) -> None:
         print("#Variant\tReference")
         for i in [
             "\t".join((line["#Variant"], line["Reference"]))
-            for line in output_dataframe.unique().to_dicts()
+            for line in output_dataframe.unique().sort("#Variant").to_dicts()
         ]:
             print(i)
     else:
-        output_dataframe.unique().write_csv(args.tsv_path, separator="\t")
+        output_dataframe.unique().sort("#Variant").write_csv(
+            args.tsv_path, separator="\t"
+        )
 
     # If we want a list with all variants ID found in reference
     if args.list_variant_id is not None:
