@@ -18,6 +18,20 @@ from utils.vcf_bed_utils import read_vcf_as_bedfile
 ##########
 parser = argparse.ArgumentParser(prog="sv_multimatching.py")
 parser.add_argument(
+    "-i",
+    "--input_file",
+    required=True,
+    type=str,
+    help="Path to bed or vcf/bcf variants file.",
+)
+parser.add_argument(
+    "-r",
+    "--reference",
+    required=True,
+    type=str,
+    help="Path to reference bed or vcf/bcf file to compare variants to.",
+)
+parser.add_argument(
     "-d",
     "--max_distance",
     required=False,
@@ -25,13 +39,6 @@ parser.add_argument(
     help="""Maximal distance between variants start/end to check if there is a match
     (default=300). Can be deactivated by setting it to -1.""",
     default=300,
-)
-parser.add_argument(
-    "-i",
-    "--input_file",
-    required=True,
-    type=str,
-    help="Path to bed or vcf/bcf variants file.",
 )
 parser.add_argument(
     "-l",
@@ -48,13 +55,6 @@ parser.add_argument(
     type=float,
     help="Reciprocal overlap needed to validate the match. (default=0.8)",
     default=0.8,
-)
-parser.add_argument(
-    "-r",
-    "--reference",
-    required=True,
-    type=str,
-    help="Path to reference bed or vcf/bcf file to compare variants to.",
 )
 parser.add_argument(
     "-t",
