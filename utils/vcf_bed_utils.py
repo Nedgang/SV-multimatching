@@ -15,6 +15,13 @@ def read_vcf_as_bedfile(vcf_path: str) -> pysam.TabixFile:
     the pysam.TabixFile for manipulation.
     Input: file_path of the file.
     """
+    if (
+        not vcf_path.endswith(".vcf.gz")
+        or not vcf_path.endswith(".vcf")
+        or not vcf_path.endswith(".bcf")
+    ):
+        raise ValueError(f"Input file: {vcf_path} not a bed.gz or VCF/BCF file!")
+
     tmp_bed = tempfile.NamedTemporaryFile()
     bedfile = tempfile.NamedTemporaryFile()
     pysam.bcftools.query(
@@ -26,7 +33,9 @@ def read_vcf_as_bedfile(vcf_path: str) -> pysam.TabixFile:
         catch_stdout=False,
     )
     # Need to force because bedfile is already created (empty)
-    pysam.tabix_compress(filename_in=tmp_bed.name, filename_out=bedfile.name, force=True)
+    pysam.tabix_compress(
+        filename_in=tmp_bed.name, filename_out=bedfile.name, force=True
+    )
     tmp_bed.close()
     pysam.tabix_index(bedfile.name, seq_col=0, start_col=1, end_col=2)
     return pysam.TabixFile(bedfile.name, parser=pysam.asBed())

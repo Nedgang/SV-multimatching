@@ -137,30 +137,15 @@ def is_there_multimatch(
 ########
 def main(args: argparse.ArgumentParser) -> None:
     """ """
-    # Check if input file is in the correct format:
+    # Check if input files are bed.gz or should be read as vcf:
     if args.input_file.endswith(".bed.gz"):
         sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
-    elif (
-        args.input_file.endswith(".vcf.gz")
-        or args.input_file.endswith(".vcf")
-        or args.input_file.endswith(".bcf")
-    ):
-        sv_bed = read_vcf_as_bedfile(args.input_file)
     else:
-        raise ValueError(f"Input file: {args.input_file} not a bed.gz or VCF/BCF file!")
-    # Check if reference file is in the correct format:
+        sv_bed = read_vcf_as_bedfile(args.input_file)
     if args.reference.endswith(".bed.gz"):
         reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
-    elif (
-        args.reference.endswith(".vcf.gz")
-        or args.reference.endswith(".vcf")
-        or args.reference.endswith(".bcf")
-    ):
-        reference_bed = read_vcf_as_bedfile(args.reference)
     else:
-        raise ValueError(
-            f"Reference file: {args.input_file} not a bed.gz or VCF/BCF file!"
-        )
+        reference_bed = read_vcf_as_bedfile(args.reference)
 
     # Initialisation of the return dataframe:
     output_dataframe = pl.DataFrame(
