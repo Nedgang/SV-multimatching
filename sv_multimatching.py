@@ -2,7 +2,6 @@
 # IMPORT #
 ##########
 import argparse
-import os
 import polars as pl
 import pysam
 import pysam.bcftools
