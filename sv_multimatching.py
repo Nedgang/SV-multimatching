@@ -27,14 +27,18 @@ parser.add_argument(
     default=300,
 )
 parser.add_argument(
-    "-i", "--input_file", required=True, type=str, help="Path to bed variants file."
+    "-i",
+    "--input_file",
+    required=True,
+    type=str,
+    help="Path to bed or vcf/bcf variants file.",
 )
 parser.add_argument(
     "-l",
     "--list_variant_id",
     required=False,
     type=str,
-    help="""Path to a txt file (no header) for a listing of variants ID found in the
+    help="""Path to a txt file (no header) to store a listing of variants ID found in the
     reference file""",
 )
 parser.add_argument(
@@ -50,7 +54,7 @@ parser.add_argument(
     "--reference",
     required=True,
     type=str,
-    help="Path to reference bed file to compare variants to.",
+    help="Path to reference bed or vcf/bcf file to compare variants to.",
 )
 parser.add_argument(
     "-t",
