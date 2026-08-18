@@ -15,7 +15,6 @@ def read_vcf_as_bedfile(vcf_path: str) -> pysam.TabixFile:
     the pysam.TabixFile for manipulation.
     Input: file_path of the file.
     """
-
     tmp_bed = tempfile.NamedTemporaryFile()
     bedfile = tempfile.NamedTemporaryFile()
     pysam.bcftools.query(
