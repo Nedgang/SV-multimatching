@@ -119,7 +119,14 @@ def vcf_to_bedfile(vcf_path: str, bed_gz_path: str) -> None:
     pysam.tabix_compress(
         filename_in=bed_path.name, filename_out=bed_gz_path, force=True
     )
+    bed_path.close()
     pysam.tabix_index(bed_gz_path, seq_col=0, start_col=1, end_col=2, force=True)
+
+
+def read_vcf_as_bedfile(file_path: str) -> pysam.TabixFile:
+    bedfile = tempfile.NamedTemporaryFile()
+    vcf_to_bedfile(file_path, bedfile.name)
+    return pysam.TabixFile(bedfile.name, parser=pysam.asBed())
 
 
 def is_there_multimatch(
@@ -163,9 +170,7 @@ def main(args: argparse.ArgumentParser) -> None:
         or args.input_file.endswith(".vcf")
         or args.input_file.endswith(".bcf")
     ):
-        input_bedfile = tempfile.NamedTemporaryFile()
-        vcf_to_bedfile(args.input_file, input_bedfile.name)
-        sv_bed = pysam.TabixFile(input_bedfile.name, parser=pysam.asBed())
+        sv_bed = read_vcf_as_bedfile(args.input_file)
     else:
         raise ValueError(f"Input file: {args.input_file} not a bed.gz or VCF/BCF file!")
     # Check if reference file is in the correct format:
@@ -176,9 +181,7 @@ def main(args: argparse.ArgumentParser) -> None:
         or args.reference.endswith(".vcf")
         or args.reference.endswith(".bcf")
     ):
-        reference_bedfile = tempfile.NamedTemporaryFile()
-        vcf_to_bedfile(args.input_file, reference_bedfile.name)
-        reference_bed = pysam.TabixFile(reference_bedfile.name, parser=pysam.asBed())
+        reference_bed = read_vcf_as_bedfile(args.reference)
     else:
         raise ValueError(
             f"Reference file: {args.input_file} not a bed.gz or VCF/BCF file!"
