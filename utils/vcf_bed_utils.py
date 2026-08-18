@@ -15,12 +15,6 @@ def read_vcf_as_bedfile(vcf_path: str) -> pysam.TabixFile:
     the pysam.TabixFile for manipulation.
     Input: file_path of the file.
     """
-    if (
-        not vcf_path.endswith(".vcf.gz")
-        or not vcf_path.endswith(".vcf")
-        or not vcf_path.endswith(".bcf")
-    ):
-        raise ValueError(f"Input file: {vcf_path} not a bed.gz or VCF/BCF file!")
 
     tmp_bed = tempfile.NamedTemporaryFile()
     bedfile = tempfile.NamedTemporaryFile()
