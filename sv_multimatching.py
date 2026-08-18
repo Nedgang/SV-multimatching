@@ -106,7 +106,7 @@ def list_of_overlap_sv(
 
 def vcf_to_bedfile(vcf_path: str, bed_gz_path: str) -> None:
     """ """
-    if bed_gz_path.split(".")[-1] != "gz" or bed_gz_path.split(".")[-2] != "bed":
+    if not bed_gz_path.endswith(".bed.gz"):
         raise ValueError(f"bed_gz_path: {bed_gz_path}. Wrong type, not a bed.gz!")
     bed_path = ".".join(bed_gz_path.split(".")[:-1])
     pysam.bcftools.query(
