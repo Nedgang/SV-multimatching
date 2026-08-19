@@ -15,7 +15,12 @@ Python libraries:
 ```
 
 ## How does it work?
-### Algorithmic
+### Principles
+Matching structural variants (SV) between them is trickier than SNV.
+The size of the SV depend strongly on the caller (and method it use), and can lead to
+problems when it's time to annotate using reference database, such as gnomAD.
+A long SV in the dataset could be found as considered 2 SV in the reference, and a very
+long SV in reference could be the same as multiple small ones in the dataset.
 
 ### Commands
 ```
