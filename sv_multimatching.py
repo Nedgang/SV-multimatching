@@ -198,7 +198,7 @@ def main(args: argparse.ArgumentParser) -> None:
             )
 
     # Then, from one reference at a time, search for all overlapping variants
-    for chr in set_chr:
+    for chr in (contig for contig in set_chr if contig in reference_bed.contigs):
         for ref in reference_bed.fetch(reference=chr):
             list_variants_intervals = list_of_overlap_sv(
                 bedfile=sv_bed,
