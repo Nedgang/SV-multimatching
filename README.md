@@ -72,7 +72,15 @@ Per exemple, the output for the example shown in the principles part, the output
   input_SV1	ref_SV5
   input_SV1,input_SV2	ref_SV6
 ```
-input_SV1 can be considered as present in the reference because it is represented by all the
-reference SV from SV1 to SV10 (minus the SV6), and is also found back from the ref_SV5.
-input_SV2 is not found alone, but in combination with SV1, can be considered as
-representative of ref_SV6.
+input_SV1 can be considered as present in the reference because it is represented by all
+the reference SV from SV1 to SV10 (minus the SV6), and is also found back from the
+ref_SV5. The input_SV2 is not found alone, but in combination with SV1, can be considered
+as representative of ref_SV6.
+
+This output is by default sent to stdout, but can be stored in a .tsv file at the path
+indicated with the -t/--tsv_path option.
+
+If you want to annotate if your variant is present in the reference, the -l/--list_variant
+option allow to specify a .txt path to store the list of all variants found in the
+reference to a file (without header). This file can then be used directly with bcftools
+to annotate your variants vcf.
