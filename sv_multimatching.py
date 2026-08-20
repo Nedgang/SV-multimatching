@@ -3,6 +3,7 @@
 # IMPORT #
 ##########
 import argparse
+import logging
 import polars as pl
 import pysam
 import pysam.bcftools
@@ -64,7 +65,8 @@ parser.add_argument(
     type=str,
     help="Path to tsv file for storing results.",
 )
-# Parser instantation
+# Parser and logger instantation
+logger = logging.getLogger(__name__)
 args = parser.parse_args()
 
 
@@ -143,14 +145,16 @@ def is_there_multimatch(
 def main(args: argparse.ArgumentParser) -> None:
     """ """
     # Check if input files are bed.gz or should be read as vcf:
-    if args.input_file.endswith(".bed.gz"):
-        sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
-    else:
-        sv_bed = read_vcf_as_bedfile(args.input_file)
-    if args.reference.endswith(".bed.gz"):
-        reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
-    else:
-        reference_bed = read_vcf_as_bedfile(args.reference)
+    sv_bed = (
+        pysam.TabixFile(args.input_file, parser=pysam.asBed())
+        if args.input_file.endswith(".bed.gz")
+        else read_vcf_as_bedfile(args.input_file)
+    )
+    reference_bed = (
+        pysam.TabixFile(args.reference, parser=pysam.asBed())
+        if args.reference.endswith(".bed.gz")
+        else read_vcf_as_bedfile(args.reference)
+    )
 
     # Initialisation of the return dataframe:
     output_dataframe = pl.DataFrame(
