@@ -66,9 +66,6 @@ parser.add_argument(
     type=str,
     help="Path to tsv file for storing results.",
 )
-# Parser and logger instantation
-logger = logging.getLogger(__name__)
-args = parser.parse_args()
 
 
 #############
@@ -168,12 +165,14 @@ def setup_logging(verbose: bool = False, log_file: str = None) -> None:
         file_handler.setFormatter(formatter)
         logging.getLogger().addHandler(file_handler)
 
+
 ########
 # MAIN #
 ########
-def main(args: argparse.ArgumentParser) -> None:
+def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
     """ """
     # Check if input files are bed.gz or should be read as vcf:
+    logger.info("Checking input file")
     sv_bed = (
         pysam.TabixFile(args.input_file, parser=pysam.asBed())
         if args.input_file.endswith(".bed.gz")
@@ -298,4 +297,8 @@ def main(args: argparse.ArgumentParser) -> None:
 
 
 if __name__ == "__main__":
-    main(args)
+    # Parser and logger instantation
+    logger = logging.getLogger(__name__)
+    args = parser.parse_args()
+    setup_logging()
+    main(args, logger)
