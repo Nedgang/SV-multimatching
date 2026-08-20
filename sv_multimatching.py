@@ -173,16 +173,21 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
     """ """
     # Check if input files are bed.gz or should be read as vcf:
     logger.info("Checking input file")
-    sv_bed = (
-        pysam.TabixFile(args.input_file, parser=pysam.asBed())
-        if args.input_file.endswith(".bed.gz")
-        else read_vcf_as_bedfile(args.input_file)
-    )
-    reference_bed = (
-        pysam.TabixFile(args.reference, parser=pysam.asBed())
-        if args.reference.endswith(".bed.gz")
-        else read_vcf_as_bedfile(args.reference)
-    )
+    if args.input_file.endswith(".bed.gz"):
+        logger.info(f"Input: {args.input_file} already in bed format")
+        sv_bed=pysam.TabixFile(args.input_file, parser=pysam.asBed())
+    else:
+        logger.info(f"Converting {args.input_file} to bed format")
+        sv_bed=read_vcf_as_bedfile(args.input_file)
+        logger.info(f"Reading {args.input_file} in bed format")
+    logger.info("Checking reference file")
+    if args.reference.endswith(".bed.gz"):
+        logger.info(f"Input: {args.reference} already in bed format")
+        reference_bed=pysam.TabixFile(args.reference, parser=pysam.asBed())
+    else:
+        logger.info(f"Converting {args.reference} to bed format")
+        reference_bed=read_vcf_as_bedfile(args.reference)
+        logger.info(f"Reading {args.reference} in bed format")
 
     # Initialisation of the return dataframe:
     output_dataframe = pl.DataFrame(
