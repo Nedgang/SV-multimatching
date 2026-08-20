@@ -23,7 +23,7 @@ problems when it's time to annotate using reference database, such as gnomAD.
 A long SV in the dataset could be found as considered 2 SV in the reference, and a very
 long SV in reference could be the same as multiple small ones in the dataset.
 
-<img src="./multimatching_sv.svg">
+<img src="./multimatching_sv.png">
 
 ### Commands
 ```
