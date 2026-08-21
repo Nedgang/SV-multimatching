@@ -43,12 +43,19 @@ parser.add_argument(
     help=f"Run {parser.prog} on debug mod.",
 )
 parser.add_argument(
+    "-j",
+    "--journal_log",
+    required=False,
+    type=str,
+    help=f"Path to a .log file to record the {parser.prog} message.",
+)
+parser.add_argument(
     "-l",
     "--list_variant_id",
     required=False,
     type=str,
     help="""Path to a txt file (no header) to store a listing of variants ID found in the
-    reference file""",
+    reference file.""",
 )
 parser.add_argument(
     "-m",
@@ -188,7 +195,7 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
     else:
         logger.info(f"Converting {args.input_file} to bed format")
         sv_bed=read_vcf_as_bedfile(args.input_file)
-        logger.info(f"Reading {args.input_file} in bed format")
+        logger.debug(f"Reading {args.input_file} in bed format")
     logger.info("Checking reference file")
     if args.reference.endswith(".bed.gz"):
         logger.info(f"Input: {args.reference} already in bed format")
@@ -197,7 +204,7 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
     else:
         logger.info(f"Converting {args.reference} to bed format")
         reference_bed=read_vcf_as_bedfile(args.reference)
-        logger.info(f"Reading {args.reference} in bed format")
+        logger.debug(f"Reading {args.reference} in bed format")
 
     # Initialisation of the return dataframe:
     output_dataframe = pl.DataFrame(
@@ -315,5 +322,5 @@ if __name__ == "__main__":
     # Parser and logger instantation
     logger = logging.getLogger(__name__)
     args = parser.parse_args()
-    setup_logging(verbose=args.debug)
+    setup_logging(verbose=args.debug, log_file= args.journal_log)
     main(args, logger)
