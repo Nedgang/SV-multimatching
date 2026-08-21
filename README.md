@@ -1,6 +1,7 @@
 # SV-multimatching: Multimatching of Structural Variants comparison
 Check if a list of structural variants could be annotated as present in a reference list
 of structural variants.
+This tool have been developped for use on DEL and DUP structural variants.
 
 ## Requirements
 Python libraries:
