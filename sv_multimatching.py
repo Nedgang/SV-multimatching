@@ -315,5 +315,5 @@ if __name__ == "__main__":
     # Parser and logger instantation
     logger = logging.getLogger(__name__)
     args = parser.parse_args()
-    setup_logging()
+    setup_logging(verbose=args.debug)
     main(args, logger)
