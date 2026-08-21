@@ -20,6 +20,7 @@ from utils.vcf_bed_utils import read_vcf_as_bedfile
 # PARSER #
 ##########
 parser = argparse.ArgumentParser(prog="sv_multimatching.py")
+# Required arguments
 parser.add_argument(
     "-i",
     "--input_file",
@@ -34,14 +35,12 @@ parser.add_argument(
     type=str,
     help="Path to reference bed or vcf/bcf file to compare variants to.",
 )
+# Options
 parser.add_argument(
     "-d",
-    "--max_distance",
-    required=False,
-    type=int,
-    help="""Maximal distance between variants start/end to check if there is a match
-    (default=300). Can be deactivated by setting it to -1.""",
-    default=300,
+    "--debug",
+    action="store_true",
+    help=f"Run {parser.prog} on debug mod.",
 )
 parser.add_argument(
     "-l",
@@ -50,6 +49,15 @@ parser.add_argument(
     type=str,
     help="""Path to a txt file (no header) to store a listing of variants ID found in the
     reference file""",
+)
+parser.add_argument(
+    "-m",
+    "--max_distance",
+    required=False,
+    type=int,
+    help="""Maximal distance between variants start/end to check if there is a match
+    (default=300). Can be deactivated by setting it to -1.""",
+    default=300,
 )
 parser.add_argument(
     "-o",
@@ -176,6 +184,7 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
     if args.input_file.endswith(".bed.gz"):
         logger.info(f"Input: {args.input_file} already in bed format")
         sv_bed=pysam.TabixFile(args.input_file, parser=pysam.asBed())
+        logger.debug(f"{args.input_file} read correctly ")
     else:
         logger.info(f"Converting {args.input_file} to bed format")
         sv_bed=read_vcf_as_bedfile(args.input_file)
@@ -184,6 +193,7 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
     if args.reference.endswith(".bed.gz"):
         logger.info(f"Input: {args.reference} already in bed format")
         reference_bed=pysam.TabixFile(args.reference, parser=pysam.asBed())
+        logger.debug(f"{args.reference} read correctly ")
     else:
         logger.info(f"Converting {args.reference} to bed format")
         reference_bed=read_vcf_as_bedfile(args.reference)
