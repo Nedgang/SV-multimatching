@@ -198,7 +198,7 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
         logger.debug(f"Reading {args.input_file} in bed format")
     logger.info("Checking reference file")
     if args.reference.endswith(".bed.gz"):
-        logger.info(f"Input: {args.reference} already in bed format")
+        logger.info(f"Reference: {args.reference} already in bed format")
         reference_bed=pysam.TabixFile(args.reference, parser=pysam.asBed())
         logger.debug(f"{args.reference} read correctly ")
     else:
