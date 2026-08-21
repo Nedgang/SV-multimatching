@@ -131,7 +131,9 @@ def is_there_multimatch(
     var_end: int,
     min_overlap: float,
 ) -> bool:
-    """ """
+    """
+        Check if the list of intervals answer to the multimatch parameters.
+    """
     return (
         is_list_intervals_in_limits(
             list_intervals,
