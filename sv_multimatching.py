@@ -9,10 +9,12 @@ import polars as pl
 import pysam
 import pysam.bcftools
 
+from itertools import combinations
 from utils.intervals_utils import (
     merged_intervals,
     overlap_size,
     is_list_intervals_in_limits,
+    overlapped_intervals,
 )
 from utils.vcf_bed_utils import read_vcf_as_bedfile
 from utils.logging_utils import setup_logging
@@ -55,8 +57,8 @@ parser.add_argument(
     "--list_variant_id",
     required=False,
     type=str,
-    help="""Path to a txt file (no header) to store a listing of variants ID found in the
-    reference file.""",
+    help="""Path to a txt output file (no header) to store a listing of variants ID found
+    in the reference file.""",
 )
 parser.add_argument(
     "-m",
@@ -71,7 +73,8 @@ parser.add_argument(
     "-n",
     "--no_overlap",
     action="store_true",
-    help="Multimatch only with variants which do not overlap.",
+    help="""Multimatch only with variants which do not overlap. Will generate one line per
+    non-overlapping variants combination.""",
 )
 parser.add_argument(
     "-o",
@@ -86,7 +89,7 @@ parser.add_argument(
     "--tsv_file",
     required=False,
     type=str,
-    help="Path to tsv file for storing results.",
+    help="Path to tsv output file for storing results.",
 )
 
 
@@ -161,14 +164,22 @@ def is_there_multimatch(
     )
 
 
-def not_overlapping_variants(variants: dict()) -> None:
-    """"""
+def find_not_overlapping_variants(variants: dict):
+    """
+    Return an iterator over all variants who do not overlap, each of which is a list
+    of variants ID.
+    """
     graph = nx.Graph()
-    print(graph)
-    # si variant[0] et variant[1] not overlap for variant in itertools.combine(variants, 2)
-    # graph.add_edge(variant[0], variant[1])
-    # yield variants in subgraph all connected nodes
-    pass
+    for variant in variants:
+        graph.add_node(variant)
+    for pair in [
+        pair
+        for pair in combinations([variant for variant in variants], 2)
+        if not overlapped_intervals(variants[pair[0]], variants[pair[1]])
+    ]:
+        graph.add_edge(pair[0], pair[1])
+
+    return nx.find_cliques(graph)
 
 
 ########
@@ -218,37 +229,55 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
             limit=args.max_distance,
             min_overlap=args.overlap,
         )
-        list_intervals = merged_intervals(
-            [(interval.start, interval.end) for interval in list_ref_intervals]
-        )
-        dic_intervals = [
-            {interval.name: (interval.start, interval.end)}
-            for interval in list_ref_intervals
-        ]
-        print(dic_intervals)
-        # Check if start and end of whole overlap intervals are in the limits
-        if is_there_multimatch(
-            list_intervals,
-            limit=args.max_distance,
-            var_start=sv.start,
-            var_end=sv.end,
-            min_overlap=args.overlap,
-        ):
-            output_dataframe = pl.concat(
-                (
-                    output_dataframe,
-                    pl.DataFrame(
-                        {
-                            "#Variant": sv.name,
-                            "Reference": ",".join(
-                                [interval.name for interval in list_ref_intervals]
+        if args.no_overlap:
+            dic_variants = {
+                interval.name: (interval.start, interval.end)
+                for interval in list_ref_intervals
+            }
+            for group in find_not_overlapping_variants(dic_variants):
+                if is_there_multimatch(
+                    sorted([dic_variants[variant] for variant in group]),
+                    limit=args.max_distance,
+                    var_start=sv.start,
+                    var_end=sv.end,
+                    min_overlap=args.overlap,
+                ):
+                    output_dataframe = pl.concat(
+                        (
+                            output_dataframe,
+                            pl.DataFrame(
+                                {
+                                    "#Variant": sv.name,
+                                    "Reference": ",".join(sorted(group)),
+                                }
                             ),
-                        }
-                    ),
+                        )
+                    )
+        else:
+            # Check if start and end of whole overlap intervals are in the limits
+            if is_there_multimatch(
+                merged_intervals(
+                    [(interval.start, interval.end) for interval in list_ref_intervals]
+                ),
+                limit=args.max_distance,
+                var_start=sv.start,
+                var_end=sv.end,
+                min_overlap=args.overlap,
+            ):
+                output_dataframe = pl.concat(
+                    (
+                        output_dataframe,
+                        pl.DataFrame(
+                            {
+                                "#Variant": sv.name,
+                                "Reference": ",".join(
+                                    [interval.name for interval in list_ref_intervals]
+                                ),
+                            }
+                        ),
+                    )
                 )
-            )
 
-    # Then, from one reference at a time, search for all overlapping variants
     logger.info("Launching multimatching on the variants from reference")
     for chr in (contig for contig in set_chr if contig in reference_bed.contigs):
         logger.debug(f"Working on {chr}")
@@ -261,31 +290,57 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
                 limit=args.max_distance,
                 min_overlap=args.overlap,
             )
-            list_intervals = merged_intervals(
-                [(interval.start, interval.end) for interval in list_variants_intervals]
-            )
-            # Check if start and end of whole overlap intervals are in the limits
-            if is_there_multimatch(
-                list_intervals,
-                limit=args.max_distance,
-                var_start=ref.start,
-                var_end=ref.end,
-                min_overlap=args.overlap,
-            ):
-                output_dataframe = pl.concat(
-                    (
-                        output_dataframe,
-                        pl.DataFrame(
-                            {
-                                "#Variant": ",".join(
-                                    interval.name
-                                    for interval in list_variants_intervals
+            if args.no_overlap:
+                dic_variants = {
+                    interval.name: (interval.start, interval.end)
+                    for interval in list_variants_intervals
+                }
+                for group in find_not_overlapping_variants(dic_variants):
+                    if is_there_multimatch(
+                        sorted([dic_variants[variant] for variant in group]),
+                        limit=args.max_distance,
+                        var_start=ref.start,
+                        var_end=ref.end,
+                        min_overlap=args.overlap,
+                    ):
+                        output_dataframe = pl.concat(
+                            (
+                                output_dataframe,
+                                pl.DataFrame(
+                                    {
+                                        "#Variant": ",".join(sorted(group)),
+                                        "Reference": ref.name,
+                                    }
                                 ),
-                                "Reference": ref.name,
-                            }
-                        ),
+                            )
+                        )
+            else:
+                if is_there_multimatch(
+                    merged_intervals(
+                        [
+                            (interval.start, interval.end)
+                            for interval in list_variants_intervals
+                        ]
+                    ),
+                    limit=args.max_distance,
+                    var_start=ref.start,
+                    var_end=ref.end,
+                    min_overlap=args.overlap,
+                ):
+                    output_dataframe = pl.concat(
+                        (
+                            output_dataframe,
+                            pl.DataFrame(
+                                {
+                                    "#Variant": ",".join(
+                                        interval.name
+                                        for interval in list_variants_intervals
+                                    ),
+                                    "Reference": ref.name,
+                                }
+                            ),
+                        )
                     )
-                )
     # Everything is done, now it's just display time.
     logger.info("Multimatching finished for input and reference")
     if args.tsv_file is None:
@@ -328,7 +383,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     setup_logging(verbose=args.debug, log_file=args.journal_log)
     logger.debug(
-        f"Launching {parser.prog} with those parameters\n"
+        f"Launching {parser.prog} with those parameters:\n"
         + "\n".join([f"{arg}: {str(getattr(args, arg))}" for arg in args.__dict__])
     )
     main(args, logger)
