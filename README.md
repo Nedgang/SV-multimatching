@@ -5,14 +5,15 @@ This tool have been developped for use on DEL and DUP structural variants.
 
 ## Requirements
 Python libraries:
+  - networkx
   - polars
   - pysam
-```
-  pip install polars pysam
+```bash
+  pip install networkx polars pysam
 ```
 
 ## Installation
-```
+```bash
   git clone git@github.com:Nedgang/SV-multimatching.git
 ```
 
@@ -28,28 +29,36 @@ long SV in reference could be the same as multiple small ones in the dataset.
 
 ### Commands
 ```
-  usage: sv_multimatching.py [-h] -i INPUT_FILE -r REFERENCE [-d MAX_DISTANCE]
-                             [-l LIST_VARIANT_ID] [-o OVERLAP] [-t TSV_PATH]
+usage: sv_multimatching.py [-h] -i INPUT_FILE -r REFERENCE [-d]
+                           [-j JOURNAL_LOG] [-l LIST_VARIANT_ID]
+                           [-m MAX_DISTANCE] [-n] [-o OVERLAP] [-t TSV_FILE]
 
-  options:
-    -h, --help            show this help message and exit
-    -i INPUT_FILE, --input_file INPUT_FILE
-                          Path to bed or vcf/bcf variants file.
-    -r REFERENCE, --reference REFERENCE
-                          Path to reference bed or vcf/bcf file to compare
-                          variants to.
-    -d MAX_DISTANCE, --max_distance MAX_DISTANCE
-                          Maximal distance between variants start/end to check
-                          if there is a match (default=300). Can be deactivated
-                          by setting it to -1.
-    -l LIST_VARIANT_ID, --list_variant_id LIST_VARIANT_ID
-                          Path to a txt file (no header) to store a listing of
-                          variants ID found in the reference file
-    -o OVERLAP, --overlap OVERLAP
-                          Reciprocal overlap needed to validate the match.
-                          (default=0.8)
-    -t TSV_PATH, --tsv_path TSV_PATH
-                          Path to tsv file for storing results.
+options:
+  -h, --help            show this help message and exit
+  -i INPUT_FILE, --input_file INPUT_FILE
+                        Path to bed or vcf/bcf variants file.
+  -r REFERENCE, --reference REFERENCE
+                        Path to reference bed or vcf/bcf file to compare
+                        variants to.
+  -d, --debug           Run sv_multimatching.py on debug mod.
+  -j JOURNAL_LOG, --journal_log JOURNAL_LOG
+                        Path to a .log file to record the sv_multimatching.py
+                        message.
+  -l LIST_VARIANT_ID, --list_variant_id LIST_VARIANT_ID
+                        Path to a txt output file (no header) to store a
+                        listing of variants ID found in the reference file.
+  -m MAX_DISTANCE, --max_distance MAX_DISTANCE
+                        Maximal distance between variants start/end to check
+                        if there is a match (default=300). Can be deactivated
+                        by setting it to -1.
+  -n, --no_overlap      Multimatch only with variants which do not overlap.
+                        Will generate one line per non-overlapping variants
+                        combination.
+  -o OVERLAP, --overlap OVERLAP
+                        Reciprocal overlap needed to validate the match.
+                        (default=0.8)
+  -t TSV_FILE, --tsv_file TSV_FILE
+                        Path to tsv output file for storing results.
 ```
 
 ### Input files format 
