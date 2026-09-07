@@ -4,6 +4,7 @@
 ##########
 import argparse
 import logging
+import networkx as nx
 import polars as pl
 import pysam
 import pysam.bcftools
@@ -65,6 +66,12 @@ parser.add_argument(
     help="""Maximal distance between variants start/end to check if there is a match
     (default=300). Can be deactivated by setting it to -1.""",
     default=300,
+)
+parser.add_argument(
+    "-n",
+    "--no_overlap",
+    action="store_true",
+    help="Multimatch only with variants which do not overlap.",
 )
 parser.add_argument(
     "-o",
@@ -132,7 +139,7 @@ def is_there_multimatch(
     min_overlap: float,
 ) -> bool:
     """
-        Check if the list of intervals answer to the multimatch parameters.
+    Check if the list of intervals answer to the multimatch parameters.
     """
     return (
         is_list_intervals_in_limits(
@@ -152,6 +159,16 @@ def is_there_multimatch(
         )
         >= min_overlap
     )
+
+
+def not_overlapping_variants(variants: dict()) -> None:
+    """"""
+    graph = nx.Graph()
+    print(graph)
+    # si variant[0] et variant[1] not overlap for variant in itertools.combine(variants, 2)
+    # graph.add_edge(variant[0], variant[1])
+    # yield variants in subgraph all connected nodes
+    pass
 
 
 ########
@@ -206,6 +223,11 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
         list_intervals = merged_intervals(
             [(interval.start, interval.end) for interval in list_ref_intervals]
         )
+        dic_intervals = [
+            {interval.name: (interval.start, interval.end)}
+            for interval in list_ref_intervals
+        ]
+        print(dic_intervals)
         # Check if start and end of whole overlap intervals are in the limits
         if is_there_multimatch(
             list_intervals,
