@@ -176,7 +176,6 @@ def not_overlapping_variants(variants: dict()) -> None:
 ########
 def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
     """ """
-    # Check if input files are bed.gz or should be read as vcf:
     logger.info("Checking input file")
     if args.input_file.endswith(".bed.gz"):
         logger.info(f"Input: {args.input_file} already in bed format")
@@ -196,7 +195,6 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
         reference_bed = read_vcf_as_bedfile(args.reference)
         logger.debug(f"Reading {args.reference} in bed format")
 
-    # Initialisation of the return dataframe:
     logger.debug("Preparing output dataframe")
     output_dataframe = pl.DataFrame(
         [
