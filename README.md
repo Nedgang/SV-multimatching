@@ -78,7 +78,8 @@ on the specified parameters. Each line will contain one variant or reference, as
 to one or more reference or variant.
 
 Per exemple, the output for the example shown in the principles part, the output will be: 
-```
+```bash
+  $ ./sv_multimatching.py -i utils/test_datasets/multiple_svs_input.bed.gz -r utils/test_datasets/multiple_svs_ref.bed.gz
   #Variant	Reference
   input_SV1	ref_SV1,ref_SV2,ref_SV3,ref_SV4,ref_SV5,ref_SV7,ref_SV8,ref_SV9,ref_SV10
   input_SV1	ref_SV5
