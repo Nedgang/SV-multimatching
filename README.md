@@ -59,6 +59,8 @@ options:
                         (default=0.8)
   -t TSV_FILE, --tsv_file TSV_FILE
                         Path to tsv output file for storing results.
+  -v, --version
+                        show program's version number and exit
 ```
 
 ### Input files format 
