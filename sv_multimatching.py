@@ -107,7 +107,7 @@ def list_of_overlap_sv(
     var_end: int,
     limit: int,
     min_overlap: float,
-) -> list:
+) -> list[(int, int)]:
     """
     Return list of interval of the sv with an big enough overlap with the variant at
     chr:start-end.
@@ -184,6 +184,7 @@ def find_not_overlapping_variants(variants: dict) -> generator[[str], None, None
         graph.add_edge(pair[0], pair[1])
 
     return nx.find_cliques(graph)
+
 
 ########
 # MAIN #
