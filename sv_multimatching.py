@@ -218,7 +218,7 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
     set_chr = set()
 
     # First from one variant at a time, search for all overlapping reference
-    logger.info("Launching multimatching on the variants from input")
+    logger.info("Launching multimatching of reference variants on variants from input")
     for sv in sv_bed.fetch():
         set_chr.add(sv.contig)
         list_ref_intervals = list_of_overlap_sv(
@@ -278,7 +278,7 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
                     )
                 )
 
-    logger.info("Launching multimatching on the variants from reference")
+    logger.info("Launching multimatching of input variants on variants from reference")
     for chr in (contig for contig in set_chr if contig in reference_bed.contigs):
         logger.debug(f"Working on {chr}")
         for ref in reference_bed.fetch(reference=chr):
