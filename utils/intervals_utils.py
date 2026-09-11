@@ -70,7 +70,7 @@ def is_list_intervals_in_limits(
 
 def overlapped_intervals(interval_a: (int, int), interval_b: (int, int)) -> bool:
     """
-        Return True if interval_a and interval_b interect one another.
+        Return True if interval_a and interval_b intersect one another.
     """
     return (interval_a[0] < interval_b[1] and interval_a[0] >= interval_b[0]) or (
         interval_b[0] < interval_a[1] and interval_b[0] >= interval_a[0]
