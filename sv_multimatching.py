@@ -91,6 +91,9 @@ parser.add_argument(
     type=str,
     help="Path to tsv output file for storing results.",
 )
+parser.add_argument(
+    "-v", "--version", action="version", version=f"{parser.prog} v1.0.0"
+)
 
 
 #############
