@@ -10,6 +10,7 @@ import pysam
 import pysam.bcftools
 
 from itertools import combinations
+from typing import generator
 from utils.intervals_utils import (
     merged_intervals,
     overlap_size,
@@ -167,7 +168,7 @@ def is_there_multimatch(
     )
 
 
-def find_not_overlapping_variants(variants: dict):
+def find_not_overlapping_variants(variants: dict) -> generator[[str], None, None]:
     """
     Return an iterator over all variants who do not overlap, each of which is a list
     of variants ID.
@@ -183,7 +184,6 @@ def find_not_overlapping_variants(variants: dict):
         graph.add_edge(pair[0], pair[1])
 
     return nx.find_cliques(graph)
-
 
 ########
 # MAIN #
