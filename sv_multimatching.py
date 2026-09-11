@@ -195,20 +195,16 @@ def main(args: argparse.ArgumentParser, logger: logging.Logger) -> None:
     if args.input_file.endswith(".bed.gz"):
         logger.info(f"Input: {args.input_file} already in bed format")
         sv_bed = pysam.TabixFile(args.input_file, parser=pysam.asBed())
-        logger.debug(f"{args.input_file} read correctly ")
     else:
         logger.info(f"Converting {args.input_file} to bed format")
         sv_bed = read_vcf_as_bedfile(args.input_file)
-        logger.debug(f"Reading {args.input_file} in bed format")
     logger.info("Checking reference file")
     if args.reference.endswith(".bed.gz"):
         logger.info(f"Reference: {args.reference} already in bed format")
         reference_bed = pysam.TabixFile(args.reference, parser=pysam.asBed())
-        logger.debug(f"{args.reference} read correctly ")
     else:
         logger.info(f"Converting {args.reference} to bed format")
         reference_bed = read_vcf_as_bedfile(args.reference)
-        logger.debug(f"Reading {args.reference} in bed format")
 
     logger.debug("Preparing output dataframe")
     output_dataframe = pl.DataFrame(
