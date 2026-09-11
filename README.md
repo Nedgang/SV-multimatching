@@ -93,7 +93,7 @@ as representative of ref_SV6.
 This output is by default sent to stdout, but can be stored in a .tsv file at the path
 indicated with the -t/--tsv_path option.
 
-If you want to annotate if your variant is present in the reference, the -l/--list_variant
+If you want to annotate when your variant is present in the reference, the -l/--list_variant
 option allow to specify a .txt path to store the list of all variants found in the
 reference to a file (without header). This file can then be used directly with bcftools
 to annotate your variants vcf.
