@@ -9,7 +9,7 @@ Python libraries:
   - polars
   - pysam
 ```bash
-  pip install networkx polars pysam
+  pip install -r requirements.txt
 ```
 
 ## Installation
